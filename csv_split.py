@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+from datetime import datetime, date
 
 data = pd.read_csv("ks-projects-201801.csv")
 
@@ -96,6 +97,32 @@ for country in countries:
 countryFile.close()
 
 
+#Create DateTime table
+dateTimeFile = open("sql_scripts/dateTimeTable.sql", "w")
+dateTimeFile.write("CREATE TABLE DateTime(idDateTime INT, year INT, month INT, day INT, hour INT, minute INT, second INT, PRIMARY KEY (idDateTime));\n")
+
+id = 1
+dateTimesMap = {}
+countryNameData = pd.read_csv("country_name.csv")
+dateTimesLaunch = data.launched.unique()
+dateTimesDeadline = data.deadline.unique()
+for dateTime in dateTimesLaunch:
+        current = datetime.fromisoformat(dateTime)
+        dateTimeFile.write("INSERT OR REPLACE INTO DateTime VALUES (" + str(id) + ", " + str(current.year) + ", " + str(current.month) + ", " + str(current.day) + ", " + str(current.hour) + 
+        ", " + str(current.minute) + ", " + str(current.second) + ");\n")
+        dateTimesMap[dateTime] = id
+        id = id+1
+
+for dateTime in dateTimesDeadline:
+        current = date.fromisoformat(dateTime)
+        dateTimeFile.write("INSERT OR REPLACE INTO DateTime VALUES (" + str(id) + ", " + str(current.year) + ", " + str(current.month) + ", " + str(current.day) + ", " + str(0) + 
+        ", " + str(0) + ", " + str(0) + ");\n")
+        dateTimesMap[dateTime] = id
+        id = id+1
+
+dateTimeFile.close()
+
+
 #Create Facts table
 factsFile = open("sql_scripts/factsTable.sql", "w")
 factsFile.write("CREATE TABLE Facts(idProject INT, nameProject VARCHAR(200), state ENUM('failed', 'successful', 'canceled', 'live', 'undefined', 'suspended'), backers INT, pledged FLOAT, goal FLOAT, usd_pledged FLOAT, usd_goal FLOAT, " +
@@ -103,6 +130,8 @@ factsFile.write("CREATE TABLE Facts(idProject INT, nameProject VARCHAR(200), sta
         "idCurrency INT, CONSTRAINT fk_idCurrency FOREIGN KEY (idCurrency) REFERENCES Currency(idCurrency) ON DELETE CASCADE ON UPDATE CASCADE, " +
         "idCategory INT, CONSTRAINT fk_idCategory FOREIGN KEY (idCategory) REFERENCES Category(idCategory) ON DELETE CASCADE ON UPDATE CASCADE, " +
         "idMainCategory INT,  CONSTRAINT fk_idMainCategory FOREIGN KEY (idMainCategory) REFERENCES MainCategory(idMainCategory) ON DELETE CASCADE ON UPDATE CASCADE, " +
+        "idDateTimeLaunch INT, CONSTRAINT fk_idDateTimeLaunch FOREIGN KEY (idDateTimeLaunch) REFERENCES DateTime(idDateTime) ON DELETE CASCADE ON UPDATE CASCADE, " +
+        "idDateTimeDeadline INT, CONSTRAINT fk_idDateTimeDeadline FOREIGN KEY (idDateTimeDeadline) REFERENCES DateTime(idDateTime) ON DELETE CASCADE ON UPDATE CASCADE, " +
         "PRIMARY KEY (idProject));\n")
 
 for fact in data.head(10).itertuples():
@@ -110,8 +139,10 @@ for fact in data.head(10).itertuples():
         idCurrency = currenciesMap[fact.currency]
         idCategory = categoriesMap[fact.category]
         idMainCategory = mainCategoriesMap[fact.main_category]
+        idDateTimeLaunch = dateTimesMap[fact.launched]
+        idDateTimeDeadline = dateTimesMap[fact.deadline]
         factsFile.write("INSERT OR REPLACE INTO Facts VALUES (" + str(fact.ID) + ", \"" + fact.name + "\", \"" + fact.state + "\", " + str(fact.backers) + ", " + str(fact.pledged) + 
         ", " + str(fact.goal) + ", " + str(fact.usd_pledged_real) + ", " + str(fact.usd_goal_real) + ", " + str(idCountry) + ", " + str(idCurrency) + ", " + str(idCategory) + 
-        ", " + str(idMainCategory) + ");\n")
+        ", " + str(idMainCategory) + ", " + str(idDateTimeLaunch) + ", " + str(idDateTimeDeadline) + ");\n")
 
 factsFile.close()
