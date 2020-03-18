@@ -14,12 +14,13 @@ data.drop(toRemove, inplace=True)
 dirName = "sql_scripts"
 if not os.path.exists(dirName):
     os.mkdir(dirName)
-    print("Directory " , dirName ,  " Created ")
+    print("Directory " , dirName ,  " created.")
 else:    
-    print("Directory " , dirName ,  " already exists")
+    print("Directory " , dirName ,  " already exists.")
 
 
 #Create Category table
+print("Creating Category table generation script... ", end='')
 categoryFile = open("sql_scripts/categoryTable.sql", "w")
 categoryFile.write("CREATE TABLE Category(idCategory INT, name VARCHAR(50), PRIMARY KEY (idCategory));\n")
 
@@ -27,14 +28,16 @@ id = 1
 categoriesMap = {}
 categories = data.category.unique()
 for category in categories:
-        categoryFile.write("INSERT OR REPLACE INTO Category VALUES (" + str(id) + ", \"" + category + "\");\n")
+        categoryFile.write("REPLACE INTO Category VALUES (" + str(id) + ", \"" + category + "\");\n")
         categoriesMap[category] = id
         id = id+1
 
 categoryFile.close()
+print("Done.")
 
 
 #Create MainCategory table
+print("Creating MainCategory table generation script... ", end='')
 mainCategoryFile = open("sql_scripts/mainCategoryTable.sql", "w")
 mainCategoryFile.write("CREATE TABLE MainCategory(idMainCategory INT, name VARCHAR(50), PRIMARY KEY (idMainCategory));\n")
 
@@ -42,14 +45,16 @@ id = 1
 mainCategoriesMap = {}
 mainCategories = data.main_category.unique()
 for mainCategory in mainCategories:
-        mainCategoryFile.write("INSERT OR REPLACE INTO MainCategory VALUES (" + str(id) + ", \"" + mainCategory + "\");\n")
+        mainCategoryFile.write("REPLACE INTO MainCategory VALUES (" + str(id) + ", \"" + mainCategory + "\");\n")
         mainCategoriesMap[mainCategory] = id
         id = id+1
 
 mainCategoryFile.close()
+print("Done.")
 
 
 #Create Currency table
+print("Creating Currency table generation script... ", end='')
 currencyFile = open("sql_scripts/currencyTable.sql", "w")
 currencyFile.write("CREATE TABLE Currency(idCurrency INTEGER, code VARCHAR(3), name VARCHAR(25), changeRate FLOAT, PRIMARY KEY (idCurrency));\n")
 
@@ -73,14 +78,16 @@ currencyInfoMap = {
         }
 currencies = data.currency.unique()
 for currency in currencies:
-        currencyFile.write("INSERT OR REPLACE INTO Currency VALUES (" + str(id) + ", \"" + currency + "\", \"" + currencyInfoMap[currency]["name"] + "\", " + str(currencyInfoMap[currency]["changeRate"]) + ");\n")
+        currencyFile.write("REPLACE INTO Currency VALUES (" + str(id) + ", \"" + currency + "\", \"" + currencyInfoMap[currency]["name"] + "\", " + str(currencyInfoMap[currency]["changeRate"]) + ");\n")
         currenciesMap[currency] = id
         id = id+1
 
 currencyFile.close()
+print("Done.")
 
 
 #Create Country table
+print("Creating Country table generation script... ", end='')
 countryFile = open("sql_scripts/countryTable.sql", "w")
 countryFile.write("CREATE TABLE Country(idCountry INT, code VARCHAR(2), name VARCHAR(25), PRIMARY KEY (idCountry));\n")
 
@@ -90,14 +97,16 @@ countryNameData = pd.read_csv("country_name.csv")
 countries = data.country.unique()
 for country in countries:
         countryName = countryNameData[countryNameData.Code == country].iloc[0]["Name"]
-        countryFile.write("INSERT OR REPLACE INTO Country VALUES (" + str(id) + ", \"" + country + "\", \"" + countryName + "\");\n")
+        countryFile.write("REPLACE INTO Country VALUES (" + str(id) + ", \"" + country + "\", \"" + countryName + "\");\n")
         countriesMap[country] = id
         id = id+1
 
 countryFile.close()
+print("Done.")
 
 
 #Create DateTime table
+print("Creating DateTime table generation script... ", end='')
 dateTimeFile = open("sql_scripts/dateTimeTable.sql", "w")
 dateTimeFile.write("CREATE TABLE DateTime(idDateTime INT, year INT, month INT, day INT, hour INT, minute INT, second INT, PRIMARY KEY (idDateTime));\n")
 
@@ -108,22 +117,24 @@ dateTimesLaunch = data.launched.unique()
 dateTimesDeadline = data.deadline.unique()
 for dateTime in dateTimesLaunch:
         current = datetime.fromisoformat(dateTime)
-        dateTimeFile.write("INSERT OR REPLACE INTO DateTime VALUES (" + str(id) + ", " + str(current.year) + ", " + str(current.month) + ", " + str(current.day) + ", " + str(current.hour) + 
+        dateTimeFile.write("REPLACE INTO DateTime VALUES (" + str(id) + ", " + str(current.year) + ", " + str(current.month) + ", " + str(current.day) + ", " + str(current.hour) + 
         ", " + str(current.minute) + ", " + str(current.second) + ");\n")
         dateTimesMap[dateTime] = id
         id = id+1
 
 for dateTime in dateTimesDeadline:
         current = date.fromisoformat(dateTime)
-        dateTimeFile.write("INSERT OR REPLACE INTO DateTime VALUES (" + str(id) + ", " + str(current.year) + ", " + str(current.month) + ", " + str(current.day) + ", " + str(0) + 
+        dateTimeFile.write("REPLACE INTO DateTime VALUES (" + str(id) + ", " + str(current.year) + ", " + str(current.month) + ", " + str(current.day) + ", " + str(0) + 
         ", " + str(0) + ", " + str(0) + ");\n")
         dateTimesMap[dateTime] = id
         id = id+1
 
 dateTimeFile.close()
+print("Done.")
 
 
 #Create Facts table
+print("Creating Facts table generation script... ", end='')
 factsFile = open("sql_scripts/factsTable.sql", "w")
 factsFile.write("CREATE TABLE Facts(idProject INT, nameProject VARCHAR(200), state ENUM('failed', 'successful', 'canceled', 'live', 'undefined', 'suspended'), backers INT, pledged FLOAT, goal FLOAT, usd_pledged FLOAT, usd_goal FLOAT, " +
         "idCountry INT, CONSTRAINT fk_idCountry FOREIGN KEY (idCountry) REFERENCES Country(idCountry) ON DELETE CASCADE ON UPDATE CASCADE, " +
@@ -134,15 +145,16 @@ factsFile.write("CREATE TABLE Facts(idProject INT, nameProject VARCHAR(200), sta
         "idDateTimeDeadline INT, CONSTRAINT fk_idDateTimeDeadline FOREIGN KEY (idDateTimeDeadline) REFERENCES DateTime(idDateTime) ON DELETE CASCADE ON UPDATE CASCADE, " +
         "PRIMARY KEY (idProject));\n")
 
-for fact in data.head(10).itertuples():
+for fact in data.itertuples():
         idCountry = countriesMap[fact.country]
         idCurrency = currenciesMap[fact.currency]
         idCategory = categoriesMap[fact.category]
         idMainCategory = mainCategoriesMap[fact.main_category]
         idDateTimeLaunch = dateTimesMap[fact.launched]
         idDateTimeDeadline = dateTimesMap[fact.deadline]
-        factsFile.write("INSERT OR REPLACE INTO Facts VALUES (" + str(fact.ID) + ", \"" + fact.name + "\", \"" + fact.state + "\", " + str(fact.backers) + ", " + str(fact.pledged) + 
+        factsFile.write("REPLACE INTO Facts VALUES (" + str(fact.ID) + ", \"" + str(fact.name).replace('"',"'") + "\", \"" + str(fact.state) + "\", " + str(fact.backers) + ", " + str(fact.pledged) + 
         ", " + str(fact.goal) + ", " + str(fact.usd_pledged_real) + ", " + str(fact.usd_goal_real) + ", " + str(idCountry) + ", " + str(idCurrency) + ", " + str(idCategory) + 
         ", " + str(idMainCategory) + ", " + str(idDateTimeLaunch) + ", " + str(idDateTimeDeadline) + ");\n")
 
 factsFile.close()
+print("Done.")
