@@ -20,8 +20,10 @@ Ensuite, rendez-vous dans la racine du projet :
 
 `cd Le-milan-royal`
 
-Pour générer les fichiers SQL dans un dossier "sql_scripts", lancez le script Python :
+Pour générer les fichiers SQL, lancez le script Python de votre choix :
 
-`python csv_split.py`
+`python csv_split.py` pour insérer toutes les valeurs contenues dans le dataset.
+
+`python csv_split_light.py` pour insérer un échantillon de 20000 valeurs contenues dans le dataset.
 
 Pour créer et remplir les tables :
