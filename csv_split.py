@@ -1,4 +1,4 @@
-import pandas as pd
+Categoryimport pandas as pd
 import os
 from datetime import datetime, date
 
@@ -22,7 +22,7 @@ else:
 #Create Category table
 print("Creating Category table generation script... ", end='')
 categoryFile = open("sql_scripts/categoryTable.sql", "w")
-categoryFile.write("CREATE TABLE Category(idCategory INT, name VARCHAR(50), PRIMARY KEY (idCategory));\n")
+categoryFile.write("CREATE TABLE Category(idCategory INT, nameCategory VARCHAR(50), PRIMARY KEY (idCategory));\n")
 
 id = 1
 categoriesMap = {}
@@ -39,7 +39,7 @@ print("Done.")
 #Create MainCategory table
 print("Creating MainCategory table generation script... ", end='')
 mainCategoryFile = open("sql_scripts/mainCategoryTable.sql", "w")
-mainCategoryFile.write("CREATE TABLE MainCategory(idMainCategory INT, name VARCHAR(50), PRIMARY KEY (idMainCategory));\n")
+mainCategoryFile.write("CREATE TABLE MainCategory(idMainCategory INT, nameMainCategory VARCHAR(50), PRIMARY KEY (idMainCategory));\n")
 
 id = 1
 mainCategoriesMap = {}
@@ -56,7 +56,7 @@ print("Done.")
 #Create Currency table
 print("Creating Currency table generation script... ", end='')
 currencyFile = open("sql_scripts/currencyTable.sql", "w")
-currencyFile.write("CREATE TABLE Currency(idCurrency INTEGER, code VARCHAR(3), name VARCHAR(25), changeRate FLOAT, PRIMARY KEY (idCurrency));\n")
+currencyFile.write("CREATE TABLE Currency(idCurrency INTEGER, code VARCHAR(3), nameCurrency VARCHAR(25), changeRate FLOAT, PRIMARY KEY (idCurrency));\n")
 
 id = 1
 currenciesMap = {}
@@ -89,7 +89,7 @@ print("Done.")
 #Create Country table
 print("Creating Country table generation script... ", end='')
 countryFile = open("sql_scripts/countryTable.sql", "w")
-countryFile.write("CREATE TABLE Country(idCountry INT, code VARCHAR(2), name VARCHAR(25), PRIMARY KEY (idCountry));\n")
+countryFile.write("CREATE TABLE Country(idCountry INT, code VARCHAR(2), nameCountry VARCHAR(25), PRIMARY KEY (idCountry));\n")
 
 id = 1
 countriesMap = {}
@@ -108,7 +108,7 @@ print("Done.")
 #Create DateTime table
 print("Creating DateTime table generation script... ", end='')
 dateTimeFile = open("sql_scripts/dateTimeTable.sql", "w")
-dateTimeFile.write("CREATE TABLE DateTime(idDateTime INT, year INT, month INT, day INT, hour INT, minute INT, second INT, PRIMARY KEY (idDateTime));\n")
+dateTimeFile.write("CREATE TABLE DateTime(idDateTime INT, year INT, month INT, day INT, PRIMARY KEY (idDateTime));\n")
 
 id = 1
 dateTimesMap = {}
@@ -117,15 +117,13 @@ dateTimesLaunch = data.launched.unique()
 dateTimesDeadline = data.deadline.unique()
 for dateTime in dateTimesLaunch:
         current = datetime.fromisoformat(dateTime)
-        dateTimeFile.write("REPLACE INTO DateTime VALUES (" + str(id) + ", " + str(current.year) + ", " + str(current.month) + ", " + str(current.day) + ", " + str(current.hour) + 
-        ", " + str(current.minute) + ", " + str(current.second) + ");\n")
+        dateTimeFile.write("REPLACE INTO DateTime VALUES (" + str(id) + ", " + str(current.year) + ", " + str(current.month) + ", " + str(current.day) + ");\n")
         dateTimesMap[dateTime] = id
         id = id+1
 
 for dateTime in dateTimesDeadline:
         current = date.fromisoformat(dateTime)
-        dateTimeFile.write("REPLACE INTO DateTime VALUES (" + str(id) + ", " + str(current.year) + ", " + str(current.month) + ", " + str(current.day) + ", " + str(0) + 
-        ", " + str(0) + ", " + str(0) + ");\n")
+        dateTimeFile.write("REPLACE INTO DateTime VALUES (" + str(id) + ", " + str(current.year) + ", " + str(current.month) + ", " + str(current.day) + ");\n")
         dateTimesMap[dateTime] = id
         id = id+1
 
