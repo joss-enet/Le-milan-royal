@@ -10,6 +10,12 @@ toRemove = data[(data.country == "N,0\"")].index
 data.drop(toRemove, inplace=True)
 
 
+#Fix launched date format
+for row in data.itertuples():
+        dateValue = datetime.fromisoformat(row.launched)
+        data.at[row.Index, 'launched'] = str(date(dateValue.year, dateValue.month, dateValue.day))
+
+
 #Create target directory
 dirName = "sql_scripts"
 if not os.path.exists(dirName):
@@ -112,17 +118,9 @@ dateTimeFile.write("CREATE TABLE DateTime(idDateTime INT, year INT, month INT, d
 
 id = 1
 dateTimesMap = {}
-countryNameData = pd.read_csv("country_name.csv")
-dateTimesLaunch = data.launched.unique()
-dateTimesDeadline = data.deadline.unique()
-for dateTime in dateTimesLaunch:
+dateTimes = data.launched.append(data.deadline).unique()
+for dateTime in dateTimes:
         current = datetime.fromisoformat(dateTime)
-        dateTimeFile.write("REPLACE INTO DateTime VALUES (" + str(id) + ", " + str(current.year) + ", " + str(current.month) + ", " + str(current.day) + ");\n")
-        dateTimesMap[dateTime] = id
-        id = id+1
-
-for dateTime in dateTimesDeadline:
-        current = date.fromisoformat(dateTime)
         dateTimeFile.write("REPLACE INTO DateTime VALUES (" + str(id) + ", " + str(current.year) + ", " + str(current.month) + ", " + str(current.day) + ");\n")
         dateTimesMap[dateTime] = id
         id = id+1
