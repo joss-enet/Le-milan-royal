@@ -4,6 +4,7 @@ from datetime import datetime, date
 
 data = pd.read_csv("ks-projects-201801.csv")
 
+print("Data cleaning... ", end='')
 
 #Remove the messed up lines
 toRemove = data[(data.country == "N,0\"")].index
@@ -15,6 +16,7 @@ for row in data.itertuples():
         dateValue = datetime.fromisoformat(row.launched)
         data.at[row.Index, 'launched'] = str(date(dateValue.year, dateValue.month, dateValue.day))
 
+print("Done.")
 
 #Create target directory
 dirName = "sql_scripts"
@@ -95,15 +97,18 @@ print("Done.")
 #Create Country table
 print("Creating Country table generation script... ", end='')
 countryFile = open("sql_scripts/countryTable.sql", "w")
-countryFile.write("CREATE TABLE Country(idCountry INT, code VARCHAR(2), nameCountry VARCHAR(25), PRIMARY KEY (idCountry));\n")
+countryFile.write("CREATE TABLE Country(idCountry INT, code VARCHAR(2), nameCountry VARCHAR(25), population INT, PRIMARY KEY (idCountry));\n")
 
 id = 1
 countriesMap = {}
 countryNameData = pd.read_csv("country_name.csv")
+countryPopulationData = pd.read_csv("country_population.csv")
 countries = data.country.unique()
 for country in countries:
-        countryName = countryNameData[countryNameData.Code == country].iloc[0]["Name"]
-        countryFile.write("REPLACE INTO Country VALUES (" + str(id) + ", \"" + country + "\", \"" + countryName + "\");\n")
+        countryName = countryNameData[countryNameData.Alpha2 == country].iloc[0]["Country"]
+        countryAlpha3 = countryNameData[countryNameData.Alpha2 == country].iloc[0]["Alpha3"]
+        population = int(countryPopulationData[countryPopulationData["Country Code"] == countryAlpha3].iloc[0]["2018"])
+        countryFile.write("REPLACE INTO Country VALUES (" + str(id) + ", \"" + country + "\", \"" + countryName + "\", " + str(population) + ");\n")
         countriesMap[country] = id
         id = id+1
 
@@ -132,7 +137,7 @@ print("Done.")
 #Create Facts table
 print("Creating Facts table generation script... ", end='')
 factsFile = open("sql_scripts/factsTable.sql", "w")
-factsFile.write("CREATE TABLE Facts(idProject INT, nameProject VARCHAR(200), state ENUM('failed', 'successful', 'canceled', 'live', 'undefined', 'suspended'), backers INT, pledged FLOAT, goal FLOAT, usd_pledged FLOAT, usd_goal FLOAT, financingRate FLOAT, duration INT, " +
+factsFile.write("CREATE TABLE Facts(idProject INT, nameProject VARCHAR(200), state ENUM('failed', 'successful', 'canceled', 'live', 'undefined', 'suspended'), backers INT, pledged FLOAT, goal FLOAT, usd_pledged FLOAT, usd_goal FLOAT, financingRate FLOAT, duration INT, averageDonation FLOAT, " +
         "idCountry INT, CONSTRAINT fk_idCountry FOREIGN KEY (idCountry) REFERENCES Country(idCountry) ON DELETE CASCADE ON UPDATE CASCADE, " +
         "idCurrency INT, CONSTRAINT fk_idCurrency FOREIGN KEY (idCurrency) REFERENCES Currency(idCurrency) ON DELETE CASCADE ON UPDATE CASCADE, " +
         "idCategory INT, CONSTRAINT fk_idCategory FOREIGN KEY (idCategory) REFERENCES Category(idCategory) ON DELETE CASCADE ON UPDATE CASCADE, " +
@@ -144,13 +149,17 @@ factsFile.write("CREATE TABLE Facts(idProject INT, nameProject VARCHAR(200), sta
 for fact in data.itertuples():
         financingRate = (fact.pledged/fact.goal)
         duration = date.fromisoformat(fact.deadline) - date.fromisoformat(fact.launched)
+        if (fact.backers == 0):
+                avgDonation = 0
+        else:
+                avgDonation = (fact.usd_pledged_real/fact.backers)
         idCountry = countriesMap[fact.country]
         idCurrency = currenciesMap[fact.currency]
         idCategory = categoriesMap[fact.category]
         idMainCategory = mainCategoriesMap[fact.main_category]
         idDateTimeLaunch = dateTimesMap[fact.launched]
         idDateTimeDeadline = dateTimesMap[fact.deadline]
-        factsFile.write("REPLACE INTO Facts VALUES (" + str(fact.ID) + ", \"" + str(fact.name).replace('"',"'") + "\", \"" + str(fact.state) + "\", " + str(fact.backers) + ", " + str(fact.pledged) + ", " + str(financingRate) + ", " + str(duration.days) +
+        factsFile.write("REPLACE INTO Facts VALUES (" + str(fact.ID) + ", \"" + str(fact.name).replace('"',"'") + "\", \"" + str(fact.state) + "\", " + str(fact.backers) + ", " + str(fact.pledged) + ", " + str(financingRate) + ", " + str(duration.days) +  ", " + str(avgDonation) +
         ", " + str(fact.goal) + ", " + str(fact.usd_pledged_real) + ", " + str(fact.usd_goal_real) + ", " + str(idCountry) + ", " + str(idCurrency) + ", " + str(idCategory) + 
         ", " + str(idMainCategory) + ", " + str(idDateTimeLaunch) + ", " + str(idDateTimeDeadline) + ");\n")
 
