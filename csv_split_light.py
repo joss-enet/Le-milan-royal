@@ -1,13 +1,26 @@
 import pandas as pd
 import os
 from datetime import datetime, date
+import argparse
 
 data = pd.read_csv("ks-projects-201801.csv")
-data = data.sample(n=20000, random_state=1)
 
-print("Data cleaning... ", end='')
+
+#Parse arguments and sample the CSV file
+parser = argparse.ArgumentParser(description='Generate SQL scripts from the Kickstarter CSV file.')
+parser.add_argument('N', type=int, help='number of rows to consider')
+args = parser.parse_args()
+
+sampleSize = args.N
+if sampleSize > len(data.index):
+        sampleSize = len(data.index)
+print("Sample of size : ", sampleSize)
+
+data = data.sample(n=sampleSize, random_state=1)
+
 
 #Remove the messed up lines
+print("Data cleaning... ", end='')
 toRemove = data[(data.country == "N,0\"")].index
 data.drop(toRemove, inplace=True)
 
@@ -20,7 +33,7 @@ for row in data.itertuples():
 print("Done.")
 
 #Create target directory
-dirName = "sql_scripts"
+dirName = "sql_scripts_light"
 if not os.path.exists(dirName):
     os.mkdir(dirName)
     print("Directory " , dirName ,  " created.")
@@ -30,7 +43,7 @@ else:
 
 #Create Category table
 print("Creating Category table generation script... ", end='')
-categoryFile = open("sql_scripts/categoryTable.sql", "w")
+categoryFile = open("sql_scripts_light/categoryTable.sql", "w")
 categoryFile.write("CREATE TABLE Category(idCategory INT, nameCategory VARCHAR(50), PRIMARY KEY (idCategory));\n")
 
 id = 1
@@ -47,7 +60,7 @@ print("Done.")
 
 #Create MainCategory table
 print("Creating MainCategory table generation script... ", end='')
-mainCategoryFile = open("sql_scripts/mainCategoryTable.sql", "w")
+mainCategoryFile = open("sql_scripts_light/mainCategoryTable.sql", "w")
 mainCategoryFile.write("CREATE TABLE MainCategory(idMainCategory INT, nameMainCategory VARCHAR(50), PRIMARY KEY (idMainCategory));\n")
 
 id = 1
@@ -64,7 +77,7 @@ print("Done.")
 
 #Create Currency table
 print("Creating Currency table generation script... ", end='')
-currencyFile = open("sql_scripts/currencyTable.sql", "w")
+currencyFile = open("sql_scripts_light/currencyTable.sql", "w")
 currencyFile.write("CREATE TABLE Currency(idCurrency INTEGER, code VARCHAR(3), nameCurrency VARCHAR(25), changeRate FLOAT, PRIMARY KEY (idCurrency));\n")
 
 id = 1
@@ -97,7 +110,7 @@ print("Done.")
 
 #Create Country table
 print("Creating Country table generation script... ", end='')
-countryFile = open("sql_scripts/countryTable.sql", "w")
+countryFile = open("sql_scripts_light/countryTable.sql", "w")
 countryFile.write("CREATE TABLE Country(idCountry INT, code VARCHAR(2), nameCountry VARCHAR(25), population INT, PRIMARY KEY (idCountry));\n")
 
 id = 1
@@ -119,7 +132,7 @@ print("Done.")
 
 #Create DateTime table
 print("Creating DateTime table generation script... ", end='')
-dateTimeFile = open("sql_scripts/dateTimeTable.sql", "w")
+dateTimeFile = open("sql_scripts_light/dateTimeTable.sql", "w")
 dateTimeFile.write("CREATE TABLE DateTime(idDateTime INT, year INT, month INT, day INT, PRIMARY KEY (idDateTime));\n")
 
 id = 1
@@ -137,7 +150,7 @@ print("Done.")
 
 #Create Facts table
 print("Creating Facts table generation script... ", end='')
-factsFile = open("sql_scripts/factsTable.sql", "w")
+factsFile = open("sql_scripts_light/factsTable.sql", "w")
 factsFile.write("CREATE TABLE Facts(idProject INT, nameProject VARCHAR(200), state ENUM('failed', 'successful', 'canceled', 'live', 'undefined', 'suspended'), backers INT, pledged FLOAT, goal FLOAT, usd_pledged FLOAT, usd_goal FLOAT, financingRate FLOAT, duration INT, averageDonation FLOAT, " +
         "idCountry INT, CONSTRAINT fk_idCountry FOREIGN KEY (idCountry) REFERENCES Country(idCountry) ON DELETE CASCADE ON UPDATE CASCADE, " +
         "idCurrency INT, CONSTRAINT fk_idCurrency FOREIGN KEY (idCurrency) REFERENCES Currency(idCurrency) ON DELETE CASCADE ON UPDATE CASCADE, " +
@@ -160,9 +173,23 @@ for fact in data.itertuples():
         idMainCategory = mainCategoriesMap[fact.main_category]
         idDateTimeLaunch = dateTimesMap[fact.launched]
         idDateTimeDeadline = dateTimesMap[fact.deadline]
-        factsFile.write("REPLACE INTO Facts VALUES (" + str(fact.ID) + ", \"" + str(fact.name).replace('"',"'") + "\", \"" + str(fact.state) + "\", " + str(fact.backers) + ", " + str(fact.pledged) + ", " + str(financingRate) + ", " + str(duration.days) +  ", " + str(avgDonation) +
+        factsFile.write("REPLACE INTO Facts VALUES (" + str(fact.ID) + ", \"" + str(fact.name).replace("\"","\'") + "\", \"" + str(fact.state) + "\", " + str(fact.backers) + ", " + str(fact.pledged) + ", " + str(financingRate) + ", " + str(duration.days) +  ", " + str(avgDonation) +
         ", " + str(fact.goal) + ", " + str(fact.usd_pledged_real) + ", " + str(fact.usd_goal_real) + ", " + str(idCountry) + ", " + str(idCurrency) + ", " + str(idCategory) + 
         ", " + str(idMainCategory) + ", " + str(idDateTimeLaunch) + ", " + str(idDateTimeDeadline) + ");\n")
 
 factsFile.close()
+print("Done.")
+
+
+#Create database generation script
+print("Creating database generation script... ", end='')
+absPath = os.path.dirname(os.path.abspath(__file__))
+dbFile = open("sql_scripts_light/dbScript.sql", "w")
+dbFile.write("source " + absPath + "/sql_scripts_light/categoryTable.sql;\n")
+dbFile.write("source " + absPath + "/sql_scripts_light/mainCategoryTable.sql;\n")
+dbFile.write("source " + absPath + "/sql_scripts_light/countryTable.sql;\n")
+dbFile.write("source " + absPath + "/sql_scripts_light/currencyTable.sql;\n")
+dbFile.write("source " + absPath + "/sql_scripts_light/dateTimeTable.sql;\n")
+dbFile.write("source " + absPath + "/sql_scripts_light/factsTable.sql;")
+dbFile.close()
 print("Done.")

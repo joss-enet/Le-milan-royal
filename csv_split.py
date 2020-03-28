@@ -4,9 +4,8 @@ from datetime import datetime, date
 
 data = pd.read_csv("ks-projects-201801.csv")
 
-print("Data cleaning... ", end='')
-
 #Remove the messed up lines
+print("Data cleaning... ", end='')
 toRemove = data[(data.country == "N,0\"")].index
 data.drop(toRemove, inplace=True)
 
@@ -159,9 +158,23 @@ for fact in data.itertuples():
         idMainCategory = mainCategoriesMap[fact.main_category]
         idDateTimeLaunch = dateTimesMap[fact.launched]
         idDateTimeDeadline = dateTimesMap[fact.deadline]
-        factsFile.write("REPLACE INTO Facts VALUES (" + str(fact.ID) + ", \"" + str(fact.name).replace('"',"'") + "\", \"" + str(fact.state) + "\", " + str(fact.backers) + ", " + str(fact.pledged) + ", " + str(financingRate) + ", " + str(duration.days) +  ", " + str(avgDonation) +
+        factsFile.write("REPLACE INTO Facts VALUES (" + str(fact.ID) + ", \"" + str(fact.name).replace("\"","\'") + "\", \"" + str(fact.state) + "\", " + str(fact.backers) + ", " + str(fact.pledged) + ", " + str(financingRate) + ", " + str(duration.days) +  ", " + str(avgDonation) +
         ", " + str(fact.goal) + ", " + str(fact.usd_pledged_real) + ", " + str(fact.usd_goal_real) + ", " + str(idCountry) + ", " + str(idCurrency) + ", " + str(idCategory) + 
         ", " + str(idMainCategory) + ", " + str(idDateTimeLaunch) + ", " + str(idDateTimeDeadline) + ");\n")
 
 factsFile.close()
+print("Done.")
+
+
+#Create database generation script
+print("Creating database generation script... ", end='')
+absPath = os.path.dirname(os.path.abspath(__file__))
+dbFile = open("sql_scripts/dbScript.sql", "w")
+dbFile.write("source " + absPath + "/sql_scripts/categoryTable.sql;\n")
+dbFile.write("source " + absPath + "/sql_scripts/mainCategoryTable.sql;\n")
+dbFile.write("source " + absPath + "/sql_scripts/countryTable.sql;\n")
+dbFile.write("source " + absPath + "/sql_scripts/currencyTable.sql;\n")
+dbFile.write("source " + absPath + "/sql_scripts/dateTimeTable.sql;\n")
+dbFile.write("source " + absPath + "/sql_scripts/factsTable.sql;")
+dbFile.close()
 print("Done.")

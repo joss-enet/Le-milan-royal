@@ -24,6 +24,18 @@ Pour générer les fichiers SQL, lancez le script Python de votre choix :
 
 `python csv_split.py` pour insérer toutes les valeurs contenues dans le dataset.
 
-`python csv_split_light.py` pour insérer un échantillon de 20000 valeurs contenues dans le dataset.
+`python csv_split_light.py N` pour insérer un échantillon de N valeurs contenues dans le dataset. Si N est supérieur ou égal à la taille du dataset, le dataset entier sera considéré.
 
-Pour créer et remplir les tables :
+Ensuite, connectez-vous à MySql et créez un nouvella vase de données (ici nommée kickstarter) :
+
+`sudo mysql`
+
+`CREATE DATABASE kickstarter;`
+
+`USE kickstarter;`
+
+Pour créer et remplir les tables, récupérez le chemin absolu du répertoire du projet (absPath) et exécutez :
+
+`source <absPath>/sql_scripts/dbScript.sql;` si vous avez utilisé le script csv_split.py.
+
+`source <absPath>/sql_scripts_light/dbScript.sql;` si vous avez utilisé le script csv_split_light.py.
