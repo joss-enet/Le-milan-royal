@@ -151,15 +151,15 @@ for fact in data.itertuples():
         if (fact.backers == 0):
                 avgDonation = 0
         else:
-                avgDonation = (fact.usd_pledged_real/fact.backers)
+                avgDonation = round((fact.usd_pledged_real/fact.backers), 2)
         idCountry = countriesMap[fact.country]
         idCurrency = currenciesMap[fact.currency]
         idCategory = categoriesMap[fact.category]
         idMainCategory = mainCategoriesMap[fact.main_category]
         idDateTimeLaunch = dateTimesMap[fact.launched]
         idDateTimeDeadline = dateTimesMap[fact.deadline]
-        factsFile.write("REPLACE INTO Facts VALUES (" + str(fact.ID) + ", \"" + str(fact.name).replace("\"","\'") + "\", \"" + str(fact.state) + "\", " + str(fact.backers) + ", " + str(fact.pledged) + ", " + str(financingRate) + ", " + str(duration.days) +  ", " + str(avgDonation) +
-        ", " + str(fact.goal) + ", " + str(fact.usd_pledged_real) + ", " + str(fact.usd_goal_real) + ", " + str(idCountry) + ", " + str(idCurrency) + ", " + str(idCategory) + 
+        factsFile.write("REPLACE INTO Facts VALUES (" + str(fact.ID) + ", \"" + str(fact.name).replace("\"","\'") + "\", \"" + str(fact.state) + "\", " + str(fact.backers) + ", " + str(fact.pledged) +
+        ", " + str(fact.goal) + ", " + str(fact.usd_pledged_real) + ", " + str(fact.usd_goal_real) + ", " + str(financingRate) + ", " + str(duration.days) +  ", " + str(avgDonation) + "," + str(idCountry) + ", " + str(idCurrency) + ", " + str(idCategory) + 
         ", " + str(idMainCategory) + ", " + str(idDateTimeLaunch) + ", " + str(idDateTimeDeadline) + ");\n")
 
 factsFile.close()
