@@ -6,6 +6,12 @@ import argparse
 data = pd.read_csv("ks-projects-201801.csv")
 
 
+#Remove the messed up lines
+print("Data cleaning... ", end='')
+toRemove = data[(data.country == "N,0\"")].index
+data.drop(toRemove, inplace=True)
+
+
 #Parse arguments and sample the CSV file
 parser = argparse.ArgumentParser(description='Generate SQL scripts from the Kickstarter CSV file.')
 parser.add_argument('N', type=int, help='number of rows to consider')
@@ -17,12 +23,6 @@ if sampleSize > len(data.index):
 print("Sample of size : ", sampleSize)
 
 data = data.sample(n=sampleSize, random_state=1)
-
-
-#Remove the messed up lines
-print("Data cleaning... ", end='')
-toRemove = data[(data.country == "N,0\"")].index
-data.drop(toRemove, inplace=True)
 
 
 #Fix launched date format
