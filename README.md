@@ -12,6 +12,8 @@ Enfin, nous avons créé un entrepôt sur notre machine en utilisant l'outil MyS
 
 ## Utilisation
 
+Ce projet nécessite Python avec la librairie pandas, ainsi que MySQL.
+
 Tout d'abord, clonez le projet sur votre machine : 
 
 `git clone https://github.com/joss-enet/Le-milan-royal`
@@ -26,7 +28,7 @@ Pour générer les fichiers SQL, lancez le script Python de votre choix :
 
 `python csv_split_light.py N` pour insérer un échantillon de N valeurs contenues dans le dataset. Si N est supérieur ou égal à la taille du dataset, le dataset entier sera considéré.
 
-Ensuite, connectez-vous à MySql et créez un nouvella vase de données (ici nommée kickstarter) :
+Ensuite, connectez-vous à MySql et créez un nouvelle base de données (ici nommée kickstarter) :
 
 `sudo mysql`
 
