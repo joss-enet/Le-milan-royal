@@ -14,7 +14,7 @@ Enfin, nous avons créé un entrepôt sur notre machine en utilisant l'outil MyS
 
 Ce projet nécessite Python avec la librairie pandas, ainsi que MySQL.
 
-Tout d'abord, clonez le projet sur votre machine : 
+Tout d'abord, clonez le projet sur votre machine :
 
 `git clone https://github.com/joss-enet/Le-milan-royal`
 
@@ -49,6 +49,19 @@ Pour créer et remplir les tables, récupérez le chemin absolu du répertoire d
 * [Docker](https://docs.docker.com/install/)
 
 ## Utilisation
+
+Tout d'abord, cleaner et convertir les données provenant des dataset CSV vers SQL.
+
+```sh
+# CSV to SQL pour toutes les entrées
+make sql_all
+# 50 000 entrées par défaut
+make sql_partial
+# Nombre spécifique d'entrées
+make COUNT=100 sql_partial
+```
+
+Puis lancer les conteneurs docker et exécuter des requêtes.
 
 ```sh
 # Les commandes docker sont à executer dans le dossier racine

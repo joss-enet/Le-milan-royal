@@ -2,7 +2,8 @@ import pandas as pd
 import os
 from datetime import datetime, date
 
-data = pd.read_csv("dataset/ks-projects-201801.csv")
+dirname = os.path.dirname(__file__)
+data = pd.read_csv(os.path.join(dirname, "../dataset/ks-projects-201801.csv"))
 
 #Remove the messed up lines
 print("Data cleaning... ", end='')
@@ -18,17 +19,17 @@ for row in data.itertuples():
 print("Done.")
 
 #Create target directory
-dirName = "database"
-if not os.path.exists(dirName):
-    os.mkdir(dirName)
-    print("Directory " , dirName ,  " created.")
-else:    
-    print("Directory " , dirName ,  " already exists.")
+distDir = os.path.join(dirname, "../database")
+if not os.path.exists(distDir):
+    os.mkdir(distDir)
+    print("Directory " , distDir ,  " created.")
+else:
+    print("Directory " , distDir ,  " already exists.")
 
 
 #Create Category table
 print("Creating Category table generation script... ", end='')
-categoryFile = open("database/1_categoryTable.sql", "w")
+categoryFile = open(os.path.join(distDir, "1_categoryTable.sql"), "w")
 categoryFile.write("CREATE TABLE Category(idCategory INT, nameCategory VARCHAR(50), PRIMARY KEY (idCategory));\n")
 
 id = 1
@@ -45,7 +46,7 @@ print("Done.")
 
 #Create MainCategory table
 print("Creating MainCategory table generation script... ", end='')
-mainCategoryFile = open("database/2_mainCategoryTable.sql", "w")
+mainCategoryFile = open(os.path.join(distDir, "2_mainCategoryTable.sql"), "w")
 mainCategoryFile.write("CREATE TABLE MainCategory(idMainCategory INT, nameMainCategory VARCHAR(50), PRIMARY KEY (idMainCategory));\n")
 
 id = 1
@@ -62,7 +63,7 @@ print("Done.")
 
 #Create Currency table
 print("Creating Currency table generation script... ", end='')
-currencyFile = open("database/3_currencyTable.sql", "w")
+currencyFile = open(os.path.join(distDir, "3_currencyTable.sql"), "w")
 currencyFile.write("CREATE TABLE Currency(idCurrency INTEGER, code VARCHAR(3), nameCurrency VARCHAR(25), changeRate FLOAT, PRIMARY KEY (idCurrency));\n")
 
 id = 1
@@ -95,13 +96,13 @@ print("Done.")
 
 #Create Country table
 print("Creating Country table generation script... ", end='')
-countryFile = open("database/4_countryTable.sql", "w")
+countryFile = open(os.path.join(distDir, "4_countryTable.sql"), "w")
 countryFile.write("CREATE TABLE Country(idCountry INT, code VARCHAR(2), nameCountry VARCHAR(25), population INT, PRIMARY KEY (idCountry));\n")
 
 id = 1
 countriesMap = {}
-countryNameData = pd.read_csv("dataset/country_name.csv")
-countryPopulationData = pd.read_csv("dataset/country_population.csv")
+countryNameData = pd.read_csv(os.path.join(distDir, "../dataset/country_name.csv"))
+countryPopulationData = pd.read_csv(os.path.join(distDir, "../dataset/country_population.csv"))
 countries = data.country.unique()
 for country in countries:
         countryName = countryNameData[countryNameData.Alpha2 == country].iloc[0]["Country"]
@@ -117,7 +118,7 @@ print("Done.")
 
 #Create DateTime table
 print("Creating DateTime table generation script... ", end='')
-dateTimeFile = open("database/5_dateTimeTable.sql", "w")
+dateTimeFile = open(os.path.join(distDir, "5_dateTimeTable.sql"), "w")
 dateTimeFile.write("CREATE TABLE DateTime(idDateTime INT, year INT, month INT, day INT, PRIMARY KEY (idDateTime));\n")
 
 id = 1
@@ -135,7 +136,7 @@ print("Done.")
 
 #Create Facts table
 print("Creating Facts table generation script... ", end='')
-factsFile = open("database/6_factsTable.sql", "w")
+factsFile = open(os.path.join(distDir, "6_factsTable.sql"), "w")
 factsFile.write("CREATE TABLE Facts(idProject INT, nameProject VARCHAR(200), state ENUM('failed', 'successful', 'canceled', 'live', 'undefined', 'suspended'), backers INT, pledged FLOAT, goal FLOAT, usd_pledged FLOAT, usd_goal FLOAT, financingRate FLOAT, duration INT, averageDonation FLOAT, " +
         "idCountry INT, CONSTRAINT fk_idCountry FOREIGN KEY (idCountry) REFERENCES Country(idCountry) ON DELETE CASCADE ON UPDATE CASCADE, " +
         "idCurrency INT, CONSTRAINT fk_idCurrency FOREIGN KEY (idCurrency) REFERENCES Currency(idCurrency) ON DELETE CASCADE ON UPDATE CASCADE, " +
@@ -159,7 +160,7 @@ for fact in data.itertuples():
         idDateTimeLaunch = dateTimesMap[fact.launched]
         idDateTimeDeadline = dateTimesMap[fact.deadline]
         factsFile.write("REPLACE INTO Facts VALUES (" + str(fact.ID) + ", \"" + str(fact.name).replace("\"","\'") + "\", \"" + str(fact.state) + "\", " + str(fact.backers) + ", " + str(fact.pledged) +
-        ", " + str(fact.goal) + ", " + str(fact.usd_pledged_real) + ", " + str(fact.usd_goal_real) + ", " + str(financingRate) + ", " + str(duration.days) +  ", " + str(avgDonation) + "," + str(idCountry) + ", " + str(idCurrency) + ", " + str(idCategory) + 
+        ", " + str(fact.goal) + ", " + str(fact.usd_pledged_real) + ", " + str(fact.usd_goal_real) + ", " + str(financingRate) + ", " + str(duration.days) +  ", " + str(avgDonation) + "," + str(idCountry) + ", " + str(idCurrency) + ", " + str(idCategory) +
         ", " + str(idMainCategory) + ", " + str(idDateTimeLaunch) + ", " + str(idDateTimeDeadline) + ");\n")
 
 factsFile.close()
