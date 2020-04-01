@@ -1,0 +1,16 @@
+CREATE TABLE MainCategory(idMainCategory INT, nameMainCategory VARCHAR(50), PRIMARY KEY (idMainCategory));
+REPLACE INTO MainCategory VALUES (1, "Music");
+REPLACE INTO MainCategory VALUES (2, "Games");
+REPLACE INTO MainCategory VALUES (3, "Technology");
+REPLACE INTO MainCategory VALUES (4, "Film & Video");
+REPLACE INTO MainCategory VALUES (5, "Design");
+REPLACE INTO MainCategory VALUES (6, "Publishing");
+REPLACE INTO MainCategory VALUES (7, "Photography");
+REPLACE INTO MainCategory VALUES (8, "Art");
+REPLACE INTO MainCategory VALUES (9, "Food");
+REPLACE INTO MainCategory VALUES (10, "Comics");
+REPLACE INTO MainCategory VALUES (11, "Fashion");
+REPLACE INTO MainCategory VALUES (12, "Crafts");
+REPLACE INTO MainCategory VALUES (13, "Theater");
+REPLACE INTO MainCategory VALUES (14, "Dance");
+REPLACE INTO MainCategory VALUES (15, "Journalism");

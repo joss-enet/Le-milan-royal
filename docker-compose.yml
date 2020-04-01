@@ -1,0 +1,23 @@
+version: "3.7"
+services:
+  database:
+    image: mysql:8
+    volumes:
+      - database:/var/lib/mysql
+      - ./database:/docker-entrypoint-initdb.d
+      - ./queries:/queries
+    environment:
+      MYSQL_DATABASE: kickstarter
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    volumes:
+      - phpmyadmin:/sessions
+    ports:
+      - 3300:80
+    environment:
+      PMA_HOST: database
+      PMA_PORT: 3306
+volumes:
+  database:
+  phpmyadmin:

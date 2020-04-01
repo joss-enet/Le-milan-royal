@@ -18,7 +18,7 @@ Tout d'abord, clonez le projet sur votre machine :
 
 `git clone https://github.com/joss-enet/Le-milan-royal`
 
-Ensuite, rendez-vous dans la racine du projet : 
+Ensuite, rendez-vous dans la racine du projet :
 
 `cd Le-milan-royal`
 
@@ -41,3 +41,51 @@ Pour créer et remplir les tables, récupérez le chemin absolu du répertoire d
 `source <absPath>/sql_scripts/dbScript.sql;` si vous avez utilisé le script csv_split.py.
 
 `source <absPath>/sql_scripts_light/dbScript.sql;` si vous avez utilisé le script csv_split_light.py.
+
+# Docker
+
+## Dépendances
+
+* [Docker](https://docs.docker.com/install/)
+
+## Utilisation
+
+```sh
+# Les commandes docker sont à executer dans le dossier racine
+# 1 - Lancement des conteneurs
+docker-compose up
+
+# 2 - Ouvrir un nouveau terminal
+# 3 - Lancer la console mysql
+docker exec -it le-milan-royal_database_1 mysql
+
+# 4 - Éxecuter une requête (dans la console mysql)
+source queries/1_popular_projects.sql
+
+# 5 - Ctrl-C pour tout quitter la console mysql
+# 5 - Ctrl-C pour quitter les logs docker-compose (1ère commande)
+# 6 - (optionnel) On supprime toutes les données
+docker-compose down -v
+```
+
+## Outils supplémentaires
+
+* [PHPMyAdmin](http://localhost:3300) - Localhost port 3300
+  * username: root
+  * password: (laisser vide)
+
+
+## Ajout de requêtes
+
+Pour ajouter une requête, ajouter un fichier sql dans le dossier `queries`. Il sera automatiquement disponible dans le conteneur docker et la requête pourra être utilisée comme dans l'exemple plus haut.
+
+## Reconstruire la base de données
+
+La base de donnée est construire en exécutant tous les fichiers présents dans le dossier `database` lors de la création du volume docker. Pour la reconstuire, il suffit de supprimer le conteneur docker ainsi que le volume associé.
+
+```sh
+# On supprime les conteneurs & volumes (dossier racine)
+docker-compose down -v
+# On relance les conteneurs et la base de donnée sera reconstruite avec tout le contenu de database
+docker-compose up
+```
