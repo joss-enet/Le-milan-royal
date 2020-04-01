@@ -103,6 +103,8 @@ Ensuite, connectez-vous à MySql et créez un nouvelle base de données (ici nom
 
 Pour créer et remplir les tables, récupérez le chemin absolu du répertoire du projet (absPath) et exécutez :
 
-`source <absPath>/database/<fichier.sql>;` si vous avez utilisé le script csv_split.py.
+`source <absPath>/database/<fichier.sql>;` La table Facts doit être créée en dernier.
 
-`source <absPath>/sql_scripts_light/dbScript.sql;` si vous avez utilisé le script csv_split_light.py.
+Pour exécuter les requêtes, lancer la commande suivante :
+
+`source <absPath>/queries/<requete.sql>;`
