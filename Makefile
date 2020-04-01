@@ -9,7 +9,7 @@ COUNT?=50000
 default: sql_all
 
 sql_all:
-	docker run -it --rm -v $(PWD):/app amancevice/pandas python /app/tools/csv_split.py
+	docker run -it --rm -v $(shell pwd):/app amancevice/pandas python /app/tools/csv_split.py
 
 sql_partial:
-	docker run -it --rm -v $(PWD):/app amancevice/pandas python /app/tools/csv_split_light.py $(COUNT)
+	docker run -it --rm -v $(shell pwd):/app amancevice/pandas python /app/tools/csv_split_light.py $(COUNT)

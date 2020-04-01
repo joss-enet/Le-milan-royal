@@ -12,8 +12,6 @@ Enfin, nous avons créé un entrepôt sur notre machine en utilisant l'outil MyS
 
 ## Utilisation
 
-Ce projet nécessite Python avec la librairie pandas, ainsi que MySQL.
-
 Tout d'abord, clonez le projet sur votre machine :
 
 `git clone https://github.com/joss-enet/Le-milan-royal`
@@ -22,33 +20,15 @@ Ensuite, rendez-vous dans la racine du projet :
 
 `cd Le-milan-royal`
 
-Pour générer les fichiers SQL, lancez le script Python de votre choix :
+A partir de maintenant, deux approches sont possibles et décrites plus bas.
 
-`python csv_split.py` pour insérer toutes les valeurs contenues dans le dataset.
+## Docker
 
-`python csv_split_light.py N` pour insérer un échantillon de N valeurs contenues dans le dataset. Si N est supérieur ou égal à la taille du dataset, le dataset entier sera considéré.
-
-Ensuite, connectez-vous à MySql et créez un nouvelle base de données (ici nommée kickstarter) :
-
-`sudo mysql`
-
-`CREATE DATABASE kickstarter;`
-
-`USE kickstarter;`
-
-Pour créer et remplir les tables, récupérez le chemin absolu du répertoire du projet (absPath) et exécutez :
-
-`source <absPath>/sql_scripts/dbScript.sql;` si vous avez utilisé le script csv_split.py.
-
-`source <absPath>/sql_scripts_light/dbScript.sql;` si vous avez utilisé le script csv_split_light.py.
-
-# Docker
-
-## Dépendances
+### Dépendances
 
 * [Docker](https://docs.docker.com/install/)
 
-## Utilisation
+### Utilisation
 
 Tout d'abord, cleaner et convertir les données provenant des dataset CSV vers SQL.
 
@@ -81,18 +61,18 @@ source queries/1_popular_projects.sql
 docker-compose down -v
 ```
 
-## Outils supplémentaires
+### Outils supplémentaires
 
 * [PHPMyAdmin](http://localhost:3300) - Localhost port 3300
   * username: root
   * password: (laisser vide)
 
 
-## Ajout de requêtes
+### Ajout de requêtes
 
 Pour ajouter une requête, ajouter un fichier sql dans le dossier `queries`. Il sera automatiquement disponible dans le conteneur docker et la requête pourra être utilisée comme dans l'exemple plus haut.
 
-## Reconstruire la base de données
+### Reconstruire la base de données
 
 La base de donnée est construire en exécutant tous les fichiers présents dans le dossier `database` lors de la création du volume docker. Pour la reconstuire, il suffit de supprimer le conteneur docker ainsi que le volume associé.
 
@@ -102,3 +82,27 @@ docker-compose down -v
 # On relance les conteneurs et la base de donnée sera reconstruite avec tout le contenu de database
 docker-compose up
 ```
+
+## Manuellement
+
+Cette approche nécessite Python avec la librairie pandas, ainsi que MySQL.
+
+Pour générer les fichiers SQL, lancez le script Python de votre choix :
+
+`python tools/csv_split.py` pour insérer toutes les valeurs contenues dans le dataset.
+
+`python tools/csv_split_light.py N` pour insérer un échantillon de N valeurs contenues dans le dataset. Si N est supérieur ou égal à la taille du dataset, le dataset entier sera considéré.
+
+Ensuite, connectez-vous à MySql et créez un nouvelle base de données (ici nommée kickstarter) :
+
+`sudo mysql`
+
+`CREATE DATABASE kickstarter;`
+
+`USE kickstarter;`
+
+Pour créer et remplir les tables, récupérez le chemin absolu du répertoire du projet (absPath) et exécutez :
+
+`source <absPath>/database/<fichier.sql>;` si vous avez utilisé le script csv_split.py.
+
+`source <absPath>/sql_scripts_light/dbScript.sql;` si vous avez utilisé le script csv_split_light.py.
